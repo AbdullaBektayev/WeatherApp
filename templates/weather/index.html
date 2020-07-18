@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>weather app</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"> <!-- CDN of Bootstrap-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <!-- CDN of Bootstrap-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script> <!-- CDN of Bootstrap-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script> <!-- CDN of Bootstrap-->
+
+    <style>.more {display: none;}</style>  <!-- for all classes with name more was invisible in page -->
+</head>
+<body>
+
+    <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">  <!-- Navbar -->
+        <h5 class="my-0 mr-md-auto font-weight-normal">Abdulla Pro</h5>
+            <a class="btn btn-primary" data-toggle="collapse" href="#contact" role="button" aria-expanded="false" aria-controls="contact">  <!-- Buttons for seeing information about company -->
+                Contacts
+            </a>
+
+    </div>
+
+    <div class="collapse" id="contact">  <!-- container for seeing this info when Contacts buttons clicked-->
+        <div class="card card-body">
+            <b>Mail :</b><p> abdulla.bektayev@gmai.com</p>  <!-- company mail address place -->
+            <b>Phone number :</b><p> +7 (771) 233 99 66</p> <!-- company phone number place -->
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class = 'col-5 offset-1'>
+                <h1>City</h1> <!-- label -->
+                    <form action = '' method="post"> <!-- Search place -->
+                        <div class="row">
+                            <div class = 'col-10'>
+                                {% csrf_token %}
+                                {{ form.name }} <!-- input city name place -->
+                            </div>
+                            <div class = 'col-1'>
+                                <input type = 'submit' name = 'send' value="Search" class="btn btn-primary" > <!-- search button -->
+                            </div>
+                        </div>
+                    </form>
+                    <br>
+                        <button id="btn1" onclick="geo()" class="btn btn-dark"><svg class="bi bi-geo-alt" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/> <!-- buttons for getting your current geolocation  -->
+    </svg></button>
+            </div>
+            <div class = 'col-5 offset-1 list-group' >
+                <div class="row">
+                    <div class="col-5 offset-1">
+                        <h1>Information</h1> <!-- Information label -->
+                    </div>
+                    <div class="col-5 offset-1">
+                        <form action="delete_all" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary sm">Delete all</button> <!-- button for deleting all city from database -->
+                        </form>
+                    </div>
+                </div>
+                {% for info in all_info %} <!-- loop for iterating all information from database -->
+                    <div class="alert alert-light list-group-item list-group-item-action">
+                        <div class = 'row'>
+                            <div class = 'col-7'>
+                                <b >City:</b> {{ info.city }}<br> <!-- getting city name from current info -->
+                                <b>Tempruture:</b> {{ info.temp }} <sup>o</sup>C<br> <!-- getting temperature from current info -->
+                                <span id="dots{{ info.id }}">...</span><br>
+                                <span id = "more{{ info.id }}" class="more"> <!-- invisible container until clicking more details -->
+                                    <b>Minumum tempruture:</b> {{ info.min }} <sup>o</sup>C<br> <!-- getting minimum temperature from current info -->
+                                    <b>Maximum tempruture:</b> {{ info.max }} <sup>o</sup>C<br> <!-- getting maximum temperature from current info -->
+                                    <b>Wind:</b> {{ info.wind }} m/s<br> <!-- getting wind velocity current info -->
+                                    <b>Pressure:</b> {{ info.pressure }} hpa<br> <!-- getting pressure from current info -->
+                                </span>
+                                <button onclick="more_or_less({{ info.id }})" id="myBtn{{ info.id }}" class="btn btn-primary">more details</button> <!-- button for seeing more or less information -->
+                            </div>
+                            <div class = 'col-2 offset-1'>
+                                <img src="http://openweathermap.org/img/w/{{ info.icon }}.png" alt="Picture of weather" class = 'img-fluid'> <!-- getting picture of weather -->
+                            </div>
+                            <form action="{{ info.id }}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button> <!-- button for deleting current City from database -->
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function geo(){ <!-- function for getting current geolocation -->
+            document.getElementById('city').value = "{{ geo_loc }}"; <!-- changing info in search input to your geolocation -->
+        };
+
+        function more_or_less(id) { <!-- function for hiding and showing additional info  -->
+            var dots = document.getElementById("dots"+id); <!-- dots which showing when additional info hiding  -->
+            var moreText = document.getElementById("more"+id); <!-- text which hiding or showing  -->
+            var btnText = document.getElementById("myBtn"+id); <!-- text on buttons  -->
+
+            if (dots.style.display === "none") { <!-- if dots dots not showing  -->
+                dots.style.display = "inline"; <!-- then show the dots  -->
+                btnText.innerHTML = "more details"; <!-- change button text  -->
+                moreText.style.display = "none"; <!-- and hide the additional info -->
+            }
+            else {  <!-- if dots dots showing  -->
+                dots.style.display = "none"; <!-- then hide the dots  -->
+                btnText.innerHTML = "less details"; <!-- change button text  -->
+                moreText.style.display = "inline"; <!-- and show the additional info -->
+            }
+        }
+    </script>
+</body>
+</html>
